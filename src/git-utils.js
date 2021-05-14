@@ -24,7 +24,10 @@ const getCommitFiles = pipeP(
  */
 const getRoot = () => git(['rev-parse', '--show-toplevel']);
 
+const getRelativePath = async path => relative(await getRoot(), path);
+
 module.exports = {
   getCommitFiles,
   getRoot,
+  getRelativePath,
 };
