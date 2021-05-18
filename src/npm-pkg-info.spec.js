@@ -4,6 +4,9 @@ const { mkdir, outputJson } = require('fs-extra');
 const { resolve } = require('path');
 
 describe('npm-pkg-info', () => {
+  const cwd = process.cwd();
+  afterEach(() => process.chdir(cwd));
+
   describe('gets project root', () => {
     it('gets package.json file path', async () => {
       const gitRoot = directory();
@@ -18,12 +21,9 @@ describe('npm-pkg-info', () => {
         version: '0.0.0',
       });
 
-      const cwd = process.cwd();
       process.chdir(projectRoot);
 
       await expect(getProjectRoot()).resolves.toBe(projectRoot);
-
-      process.chdir(cwd);
     });
 
     it('fails if no package.json file', async () => {
@@ -36,12 +36,9 @@ describe('npm-pkg-info', () => {
       const projectRoot = resolve(gitRoot, 'projects', projectName);
       await mkdir(projectRoot, { recursive: true });
 
-      const cwd = process.cwd();
       process.chdir(projectRoot);
 
       await expect(getProjectRoot()).rejects.toThrow('No package.json file');
-
-      process.chdir(cwd);
     });
   });
 
@@ -55,12 +52,9 @@ describe('npm-pkg-info', () => {
         version: '0.0.0',
       });
 
-      const cwd = process.cwd();
       process.chdir(projectRoot);
 
       await expect(getProjectName()).resolves.toBe(projectName);
-
-      process.chdir(cwd);
     });
 
     it('fails if no package.json file', async () => {
@@ -73,12 +67,9 @@ describe('npm-pkg-info', () => {
       const projectRoot = resolve(gitRoot, 'projects', projectName);
       await mkdir(projectRoot, { recursive: true });
 
-      const cwd = process.cwd();
       process.chdir(projectRoot);
 
       await expect(getProjectName()).rejects.toThrow('No package.json file');
-
-      process.chdir(cwd);
     });
   });
 });

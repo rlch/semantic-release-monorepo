@@ -1,4 +1,8 @@
-const { getProjectRoot, getProjectName } = require('./npm-pkg-info');
+const {
+  getProjectRoot,
+  getProjectName,
+  getProjectNameSync,
+} = require('./npm-pkg-info');
 const plugin = require('./core/plugin');
 
-module.exports = await plugin(getProjectRoot, getProjectName);
+module.exports = plugin(getProjectRoot, getProjectName, getProjectNameSync);

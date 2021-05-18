@@ -31,7 +31,20 @@ const getProjectName = async () => {
   }
 };
 
+const getProjectNameSync = () => {
+  try {
+    return readPkg.sync().name;
+  } catch {
+    throw new SemanticReleaseError(
+      'No package.json file',
+      'NO_PACKAGE_JSON',
+      'semantic-release should be ran in an individual monorepo package with a package.json file'
+    );
+  }
+};
+
 module.exports = {
   getProjectRoot,
   getProjectName,
+  getProjectNameSync,
 };

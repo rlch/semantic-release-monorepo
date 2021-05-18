@@ -66,10 +66,10 @@ const fail = (getProjectRoot, getProjectName) =>
     }
   );
 
-module.exports = async (getProjectRoot, getProjectName) => ({
+module.exports = (getProjectRoot, getProjectName, getProjectNameSync) => ({
   analyzeCommits: analyzeCommits(getProjectRoot, getProjectName),
   generateNotes: generateNotes(getProjectRoot, getProjectName),
   success: success(getProjectRoot, getProjectName),
   fail: fail(getProjectRoot, getProjectName),
-  tagFormat: (await getProjectName()) + '-v${version}',
+  tagFormat: getProjectNameSync() + '-v${version}',
 });
