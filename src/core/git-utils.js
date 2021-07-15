@@ -1,3 +1,4 @@
+const { relative } = require('path');
 const { pipeP, split } = require('ramda');
 const execa = require('execa');
 
