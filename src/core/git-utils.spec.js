@@ -1,74 +1,44 @@
-const { directory } = require('tempy');
-const { resolve } = require('path');
-const execa = require('execa');
-const { mkdir } = require('fs-extra');
-const { getRoot, getRelativePath } = require('./git-utils');
+const { outputFile } = require('fs-extra');
+const { resolve, relative, normalize } = require('path');
+
+const { getRoot, getRelativePath, getCommitFiles } = require('./git-utils');
+const { commitAll, setupGitTestEnv } = require('../test-env');
 
 describe('git-utils', () => {
-  const cwd = process.cwd();
+  it('gets commit files', async () => {
+    const gitRoot = await setupGitTestEnv();
+
+    const filePath = resolve(gitRoot, 'projects', 'project1', 'file1.txt');
+    await outputFile(filePath, 'content1');
+
+    const hash = await commitAll(gitRoot, 'fix: file1');
+
+    const commitFiles = (await getCommitFiles(hash, gitRoot)).map(x =>
+      normalize(x)
+    );
+    expect(commitFiles).toIncludeAllMembers([relative(gitRoot, filePath)]);
+  });
 
   it('gets git root from root', async () => {
-    const gitOrigin = directory();
-    process.chdir(gitOrigin);
-    const gitRepoName = 'workspace';
-    await execa('git', ['init', '--bare', `${gitRepoName}.git`]);
-    const gitRepoDirectory = resolve(gitOrigin, `${gitRepoName}.git`);
-    const gitRepo = `file://${gitRepoDirectory}`;
+    const gitRoot = await setupGitTestEnv();
 
-    const srcRoot = directory();
-    process.chdir(srcRoot);
-    await execa('git', ['clone', gitRepo]);
-    const gitRoot = resolve(srcRoot, gitRepoName);
-
-    process.chdir(gitRoot);
-
-    const root = await getRoot();
-    expect(resolve(root)).toBe(gitRoot);
+    const root = normalize(await getRoot(gitRoot));
+    expect(root).toBe(gitRoot);
   });
 
   it('gets git root from subdirectory', async () => {
-    const gitOrigin = directory();
-    process.chdir(gitOrigin);
-    const gitRepoName = 'workspace';
-    await execa('git', ['init', '--bare', `${gitRepoName}.git`]);
-    const gitRepoDirectory = resolve(gitOrigin, `${gitRepoName}.git`);
-    const gitRepo = `file://${gitRepoDirectory}`;
+    const gitRoot = await setupGitTestEnv(['project1']);
+    const project1Root = resolve(gitRoot, 'projects', 'project1');
 
-    const srcRoot = directory();
-    process.chdir(srcRoot);
-    await execa('git', ['clone', gitRepo]);
-    const gitRoot = resolve(srcRoot, gitRepoName);
-
-    const project1Name = 'test1';
-    const project1Root = resolve(gitRoot, 'projects', project1Name);
-    await mkdir(project1Root, { recursive: true });
-
-    process.chdir(project1Root);
-
-    const root = await getRoot();
-    expect(resolve(root)).toBe(gitRoot);
+    const root = normalize(await getRoot(project1Root));
+    expect(root).toBe(gitRoot);
   });
 
   it('gets relative path', async () => {
-    const gitOrigin = directory();
-    process.chdir(gitOrigin);
-    const gitRepoName = 'workspace';
-    await execa('git', ['init', '--bare', `${gitRepoName}.git`]);
-    const gitRepoDirectory = resolve(gitOrigin, `${gitRepoName}.git`);
-    const gitRepo = `file://${gitRepoDirectory}`;
+    const gitRoot = await setupGitTestEnv(['project1']);
+    const project1Root = resolve(gitRoot, 'projects', 'project1');
 
-    const srcRoot = directory();
-    process.chdir(srcRoot);
-    await execa('git', ['clone', gitRepo]);
-    const gitRoot = resolve(srcRoot, gitRepoName);
-
-    const project1Name = 'test1';
-    const project1Root = resolve(gitRoot, 'projects', project1Name);
-    await mkdir(project1Root, { recursive: true });
-
-    process.chdir(project1Root);
-
-    const relativePath = await getRelativePath(project1Root);
-    expect(resolve(gitRoot, relativePath)).toBe(project1Root);
+    const relativePath = await getRelativePath(project1Root, project1Root);
+    expect(relativePath).toBe(relative(gitRoot, project1Root));
   });
 });

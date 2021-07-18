@@ -1,75 +1,59 @@
-const { getProjectRoot, getProjectName } = require('./npm-pkg-info');
+const {
+  getProjectRoot,
+  getProjectName,
+  getProjectNameSync,
+} = require('./npm-pkg-info');
 const { directory } = require('tempy');
 const { mkdir, outputJson } = require('fs-extra');
 const { resolve } = require('path');
+const { setupGitTestEnv } = require('./test-env');
 
 describe('npm-pkg-info', () => {
-  const cwd = process.cwd();
-  afterEach(() => process.chdir(cwd));
-
   describe('gets project root', () => {
     it('gets package.json file path', async () => {
-      const gitRoot = directory();
-      await outputJson(resolve(gitRoot, 'package.json'), {
-        name: 'workspace',
-        version: '0.0.0',
-      });
-      const projectName = 'test';
+      const projectName = 'project1';
+      const gitRoot = await setupGitTestEnv([projectName]);
       const projectRoot = resolve(gitRoot, 'projects', projectName);
-      await outputJson(resolve(projectRoot, 'package.json'), {
-        name: projectName,
-        version: '0.0.0',
-      });
 
-      process.chdir(projectRoot);
-
-      await expect(getProjectRoot()).resolves.toBe(projectRoot);
+      await expect(getProjectRoot(projectRoot)).resolves.toBe(projectRoot);
     });
 
     it('fails if no package.json file', async () => {
-      const gitRoot = directory();
-      await outputJson(resolve(gitRoot, 'package.json'), {
-        name: 'workspace',
-        version: '0.0.0',
-      });
-      const projectName = 'test';
-      const projectRoot = resolve(gitRoot, 'projects', projectName);
-      await mkdir(projectRoot, { recursive: true });
-
-      process.chdir(projectRoot);
-
-      await expect(getProjectRoot()).rejects.toThrow('No package.json file');
+      await expect(getProjectRoot(directory())).rejects.toThrow(
+        'No package.json file'
+      );
     });
   });
 
   describe('gets project name', () => {
     it('gets package.json name', async () => {
-      const gitRoot = directory();
-      const projectName = 'test';
+      const projectName = 'project1';
+      const gitRoot = await setupGitTestEnv([projectName]);
       const projectRoot = resolve(gitRoot, 'projects', projectName);
-      await outputJson(resolve(projectRoot, 'package.json'), {
-        name: projectName,
-        version: '0.0.0',
-      });
 
-      process.chdir(projectRoot);
-
-      await expect(getProjectName()).resolves.toBe(projectName);
+      await expect(getProjectName(projectRoot)).resolves.toBe(projectName);
     });
 
     it('fails if no package.json file', async () => {
-      const gitRoot = directory();
-      await outputJson(resolve(gitRoot, 'package.json'), {
-        name: 'workspace',
-        version: '0.0.0',
-      });
-      const projectName = 'test';
+      await expect(getProjectName(directory())).rejects.toThrow(
+        'No package.json file'
+      );
+    });
+  });
+
+  describe('gets project name synchronously', () => {
+    it('gets package.json name', async () => {
+      const projectName = 'project1';
+      const gitRoot = await setupGitTestEnv([projectName]);
       const projectRoot = resolve(gitRoot, 'projects', projectName);
-      await mkdir(projectRoot, { recursive: true });
 
-      process.chdir(projectRoot);
+      expect(getProjectNameSync(projectRoot)).toBe(projectName);
+    });
 
-      await expect(getProjectName()).rejects.toThrow('No package.json file');
+    it('fails if no package.json file', async () => {
+      expect(() => getProjectNameSync(directory())).toThrow(
+        'No package.json file'
+      );
     });
   });
 });

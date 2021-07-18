@@ -3,7 +3,6 @@ const { pathExists } = require('fs-extra');
 const { resolve } = require('path');
 const execa = require('execa');
 const {
-  chdirPreserveCwd,
   clone,
   createOrigin,
   setupWorkspace,
@@ -13,6 +12,11 @@ const {
 describe('test-env', () => {
   const semanticReleaseMonorepo = process.cwd();
   const defaultPlugin = resolve(semanticReleaseMonorepo, 'src');
+
+  beforeEach(() => {
+    process.env.Path += ';C:\\Program Files\\Git\\mingw64\\bin';
+    // TODO : ajouter des commentaires de méthodes
+  });
 
   it('creates an origin git repository', async () => {
     const originDirectory = await createOrigin();
@@ -53,17 +57,6 @@ describe('test-env', () => {
   }, 30000);
 
   it('creates a test environment', async () => {
-    // TODO
+    // TODO x2
   }, 30000);
-
-  it('preserves current working directory', async () => {
-    const cwd = process.cwd();
-
-    const targetDirectory = directory();
-    await chdirPreserveCwd(targetDirectory, async () => {
-      expect(process.cwd()).toBe(targetDirectory);
-    });
-
-    expect(process.cwd()).toBe(cwd);
-  });
 });

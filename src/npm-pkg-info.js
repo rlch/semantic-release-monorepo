@@ -3,12 +3,14 @@ const readPkg = require('read-pkg');
 const { resolve } = require('path');
 const SemanticReleaseError = require('@semantic-release/error');
 
-const getProjectRoot = async () => {
-  const pkgPath = await pkgUp();
+const getProjectRoot = async cwd => {
+  cwd = cwd || process.cwd();
+
+  const pkgPath = await pkgUp(cwd);
 
   if (pkgPath) {
-    if (resolve(pkgPath, '..') === process.cwd()) {
-      return process.cwd();
+    if (resolve(pkgPath, '..') === cwd) {
+      return cwd;
     }
   }
 
@@ -19,9 +21,11 @@ const getProjectRoot = async () => {
   );
 };
 
-const getProjectName = async () => {
+const getProjectName = async cwd => {
+  cwd = cwd || process.cwd();
+
   try {
-    return (await readPkg()).name;
+    return (await readPkg({ cwd })).name;
   } catch {
     throw new SemanticReleaseError(
       'No package.json file',
@@ -31,9 +35,11 @@ const getProjectName = async () => {
   }
 };
 
-const getProjectNameSync = () => {
+const getProjectNameSync = cwd => {
+  cwd = cwd || process.cwd();
+
   try {
-    return readPkg.sync().name;
+    return readPkg.sync({ cwd }).name;
   } catch {
     throw new SemanticReleaseError(
       'No package.json file',

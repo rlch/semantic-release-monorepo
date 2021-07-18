@@ -2,8 +2,10 @@ const glob = require('glob-promise');
 const { resolve } = require('path');
 const SemanticReleaseError = require('@semantic-release/error');
 
-const getProjectRoot = async () => {
-  const csprojPath = (await glob('*.csproj', { absolute: true }))[0];
+const getProjectRoot = async cwd => {
+  cwd = cwd || process.cwd();
+
+  const csprojPath = (await glob('*.csproj', { absolute: true, cwd }))[0];
 
   if (csprojPath) {
     return resolve(csprojPath, '..');
@@ -16,8 +18,10 @@ const getProjectRoot = async () => {
   );
 };
 
-const getProjectName = async () => {
-  const csprojFile = (await glob('*.csproj'))[0];
+const getProjectName = async cwd => {
+  cwd = cwd || process.cwd();
+
+  const csprojFile = (await glob('*.csproj', { cwd }))[0];
 
   if (csprojFile) {
     return csprojFile.slice(0, -'.csproj'.length);
@@ -30,8 +34,10 @@ const getProjectName = async () => {
   );
 };
 
-const getProjectNameSync = () => {
-  const csprojFile = glob.sync('*.csproj')[0];
+const getProjectNameSync = cwd => {
+  cwd = cwd || process.cwd();
+
+  const csprojFile = glob.sync('*.csproj', { cwd })[0];
 
   if (csprojFile) {
     return csprojFile.slice(0, -'.csproj'.length);

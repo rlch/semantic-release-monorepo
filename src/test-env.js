@@ -44,62 +44,59 @@ const setupWorkspace = async () => {
 const setupProject = async (gitRoot, projectName, monorepoPluginPath) => {
   const projectRoot = resolve(gitRoot, 'projects', projectName);
   await mkdir(projectRoot, { recursive: true });
-  await chdirPreserveCwd(projectRoot, async () => {
-    await execa('npm', ['init', '-y']);
-  });
+  await execa('npm', ['init', '-y'], { cwd: projectRoot });
   await pushAll(gitRoot, `init ${projectName}'`);
   await outputFile(resolve(projectRoot, 'README.md'), 'Read me...');
   await pushAll(gitRoot, 'feat: add README to  ${projectName}');
-  await applySemRel(gitRoot, projectName, monorepoPluginPath, true);
+  monorepoPluginPath &&
+    (await applySemRel(gitRoot, projectName, monorepoPluginPath, true));
 };
 
 const applySemRel = async (gitRoot, projectName, monorepoPluginPath, noLog) => {
   const projectRoot = resolve(gitRoot, 'projects', projectName);
-  await chdirPreserveCwd(projectRoot, async () => {
-    const semRel = execa('npx', [
-      'semantic-release',
-      '-e',
-      monorepoPluginPath,
-      '--no-ci',
-    ]);
-    if (!noLog) {
-      semRel.stdout.pipe(process.stdout, { end: false });
-      semRel.stderr.pipe(process.stderr, { end: false });
-    }
-    await semRel;
-  });
+  const semRel = execa(
+    'npx',
+    ['semantic-release', '-e', monorepoPluginPath, '--no-ci'],
+    { cwd: projectRoot }
+  );
+  if (!noLog) {
+    semRel.stdout.pipe(process.stdout, { end: false });
+    semRel.stderr.pipe(process.stderr, { end: false });
+  }
+  await semRel;
 };
 
 const commitAll = async (gitRoot, message) => {
-  await chdirPreserveCwd(gitRoot, async () => {
-    await execa('git', ['add', '-A']);
-    await execa('git', ['commit', '-m', message]);
+  await execa('git', ['add', '-A'], { cwd: gitRoot });
+  await execa('git', ['commit', '-m', message], { cwd: gitRoot });
+  const { stdout } = await execa('git', ['rev-parse', '--verify', 'HEAD'], {
+    cwd: gitRoot,
   });
+  return stdout;
 };
 
 const pushAll = async (gitRoot, message) => {
   await commitAll(gitRoot, message);
-
-  await chdirPreserveCwd(gitRoot, async () => {
-    await execa('git', ['push', 'origin', 'master']);
+  await execa('git', ['push', 'origin', 'master'], {
+    cwd: gitRoot,
   });
 };
 
-const setupTestEnv = async monorepoPluginPath => {
+const setupSemRelTestEnv = async (projectNames = [], monorepoPluginPath) => {
   const gitRoot = await setupWorkspace();
-  await setupProject(gitRoot, 'project1', monorepoPluginPath);
-  await setupProject(gitRoot, 'project2', monorepoPluginPath);
+
+  for (const projectName of projectNames) {
+    await setupProject(gitRoot, projectName, monorepoPluginPath);
+  }
 
   return gitRoot;
 };
 
-const chdirPreserveCwd = async (targetDirectory, myFunction) => {
-  const cwd = process.cwd();
-  process.chdir(targetDirectory);
-  await myFunction();
-  process.chdir(cwd);
+const setupGitTestEnv = async (projectNames = []) => {
+  return await setupSemRelTestEnv(projectNames, undefined);
 };
 
+// TODO : split in 3 files -> test-env, npm-test-env, dotnet-test-env
 module.exports = {
   createOrigin,
   clone,
@@ -108,6 +105,6 @@ module.exports = {
   applySemRel,
   commitAll,
   pushAll,
-  setupTestEnv,
-  chdirPreserveCwd,
+  setupGitTestEnv,
+  setupSemRelTestEnv,
 };

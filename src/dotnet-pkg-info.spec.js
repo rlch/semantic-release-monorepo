@@ -4,54 +4,35 @@ const { mkdir, outputFile } = require('fs-extra');
 const { resolve } = require('path');
 
 describe('dotnet-pkg-info', () => {
-  const cwd = process.cwd();
-  afterEach(() => process.chdir(cwd));
-
   describe('gets project root', () => {
     it('gets .csproj file path', async () => {
-      const gitRoot = directory();
-      const projectName = 'test';
-      const projectRoot = resolve(gitRoot, projectName);
+      const projectName = 'project1';
+      const projectRoot = resolve(directory(), projectName);
       await outputFile(resolve(projectRoot, `${projectName}.csproj`), '');
 
-      process.chdir(projectRoot);
-
-      expect(await getProjectRoot()).toBe(projectRoot);
+      expect(await getProjectRoot(projectRoot)).toBe(projectRoot);
     });
 
     it('fails if no .csproj file', async () => {
-      const gitRoot = directory();
-      const projectName = 'test';
-      const projectRoot = resolve(gitRoot, 'projects', projectName);
-      await mkdir(projectRoot, { recursive: true });
-
-      process.chdir(projectRoot);
-
-      await expect(getProjectRoot()).rejects.toThrow('No .csproj file');
+      await expect(getProjectRoot(directory())).rejects.toThrow(
+        'No .csproj file'
+      );
     });
   });
 
   describe('gets project name', () => {
     it('gets .csproj name', async () => {
-      const gitRoot = directory();
-      const projectName = 'test';
-      const projectRoot = resolve(gitRoot, projectName);
+      const projectName = 'project1';
+      const projectRoot = resolve(directory(), projectName);
       await outputFile(resolve(projectRoot, `${projectName}.csproj`), '');
 
-      process.chdir(projectRoot);
-
-      expect(await getProjectName()).toBe(projectName);
+      expect(await getProjectName(projectRoot)).toBe(projectName);
     });
 
     it('fails if no .csproj file', async () => {
-      const gitRoot = directory();
-      const projectName = 'test';
-      const projectRoot = resolve(gitRoot, 'projects', projectName);
-      await mkdir(projectRoot, { recursive: true });
-
-      process.chdir(projectRoot);
-
-      await expect(getProjectName()).rejects.toThrow('No .csproj file');
+      await expect(getProjectName(directory())).rejects.toThrow(
+        'No .csproj file'
+      );
     });
   });
 });
