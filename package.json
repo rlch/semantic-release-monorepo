@@ -51,7 +51,8 @@
   },
   "jest": {
     "setupFilesAfterEnv": [
-      "jest-extended"
+      "jest-extended",
+      "./jest.setup-git-windows.js"
     ]
   }
 }

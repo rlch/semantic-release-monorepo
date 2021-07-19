@@ -3,6 +3,13 @@ const readPkg = require('read-pkg');
 const { resolve } = require('path');
 const SemanticReleaseError = require('@semantic-release/error');
 
+const newNoPackageJsonError = () =>
+  new SemanticReleaseError(
+    'No package.json file',
+    'NO_PACKAGE_JSON',
+    'semantic-release should be ran in an individual monorepo package with a package.json file'
+  );
+
 const getProjectRoot = async cwd => {
   cwd = cwd || process.cwd();
 
@@ -14,11 +21,7 @@ const getProjectRoot = async cwd => {
     }
   }
 
-  throw new SemanticReleaseError(
-    'No package.json file',
-    'NO_PACKAGE_JSON',
-    'semantic-release should be ran in an individual monorepo package with a package.json file'
-  );
+  throw newNoPackageJsonError();
 };
 
 const getProjectName = async cwd => {
@@ -27,11 +30,7 @@ const getProjectName = async cwd => {
   try {
     return (await readPkg({ cwd })).name;
   } catch {
-    throw new SemanticReleaseError(
-      'No package.json file',
-      'NO_PACKAGE_JSON',
-      'semantic-release should be ran in an individual monorepo package with a package.json file'
-    );
+    throw newNoPackageJsonError();
   }
 };
 
@@ -41,11 +40,7 @@ const getProjectNameSync = cwd => {
   try {
     return readPkg.sync({ cwd }).name;
   } catch {
-    throw new SemanticReleaseError(
-      'No package.json file',
-      'NO_PACKAGE_JSON',
-      'semantic-release should be ran in an individual monorepo package with a package.json file'
-    );
+    throw newNoPackageJsonError();
   }
 };
 
