@@ -1,18 +1,18 @@
+const { resolve } = require('path');
+const { directory } = require('tempy');
+
 const {
   getProjectRoot,
   getProjectName,
   getProjectNameSync,
 } = require('./npm-pkg-info');
-const { directory } = require('tempy');
-const { mkdir, outputJson } = require('fs-extra');
-const { resolve } = require('path');
-const { setupGitTestEnv } = require('./test-env');
+const { setupTestEnv } = require('./npm-test-env');
 
 describe('npm-pkg-info', () => {
   describe('gets project root', () => {
     it('gets package.json file path', async () => {
-      const projectName = 'project1';
-      const gitRoot = await setupGitTestEnv([projectName]);
+      const projectName = 'my-project';
+      const gitRoot = await setupTestEnv([projectName]);
       const projectRoot = resolve(gitRoot, 'projects', projectName);
 
       await expect(getProjectRoot(projectRoot)).resolves.toBe(projectRoot);
@@ -27,8 +27,8 @@ describe('npm-pkg-info', () => {
 
   describe('gets project name', () => {
     it('gets package.json name', async () => {
-      const projectName = 'project1';
-      const gitRoot = await setupGitTestEnv([projectName]);
+      const projectName = 'my-project';
+      const gitRoot = await setupTestEnv([projectName]);
       const projectRoot = resolve(gitRoot, 'projects', projectName);
 
       await expect(getProjectName(projectRoot)).resolves.toBe(projectName);
@@ -43,8 +43,8 @@ describe('npm-pkg-info', () => {
 
   describe('gets project name synchronously', () => {
     it('gets package.json name', async () => {
-      const projectName = 'project1';
-      const gitRoot = await setupGitTestEnv([projectName]);
+      const projectName = 'my-project';
+      const gitRoot = await setupTestEnv([projectName]);
       const projectRoot = resolve(gitRoot, 'projects', projectName);
 
       expect(getProjectNameSync(projectRoot)).toBe(projectName);

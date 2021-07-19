@@ -1,27 +1,135 @@
 const { outputFile } = require('fs-extra');
 const { resolve } = require('path');
-const { commitAll, applySemRel, setupSemRelTestEnv } = require('./test-env');
-const execa = require('execa');
+const { setupTestEnv } = require('./npm-test-env');
+
+const { commitAll, applySemRel } = require('./test-env');
 
 describe('npm', () => {
-  const semanticReleaseMonorepo = process.cwd();
-  const npmPlugin = resolve(semanticReleaseMonorepo, 'src', 'npm');
+  const semanticReleaseMonorepoPath = process.cwd();
+  const npmMonorepoPluginPath = resolve(
+    semanticReleaseMonorepoPath,
+    'src',
+    'npm'
+  );
 
-  beforeEach(async () => {
-    process.env.Path += ';C:\\Program Files\\Git\\mingw64\\bin';
-  });
+  it('does not release chore commits', async () => {
+    const projectName = 'my-project';
+    const gitRoot = await setupTestEnv([projectName]);
 
-  // To fix 'git-upload-pack: command not found' error on Windows, add 'C:\\Program Files\\Git\\mingw64\\bin' to PATH environment variable
-  it('gets package.json file path', async () => {
-    const gitRoot = await setupSemRelTestEnv(['project1'], npmPlugin);
+    const choreSemRel = await applySemRel(
+      gitRoot,
+      projectName,
+      npmMonorepoPluginPath
+    );
+    expect(choreSemRel.stdout).toContain(
+      'There are no relevant changes, so no new version is released'
+    );
+  }, 30000);
 
-    const project1Root = resolve(gitRoot, 'projects', 'project1');
-    await outputFile(resolve(project1Root, 'file1.txt'), 'content1');
+  it('releases major version for initial commit', async () => {
+    const projectName = 'my-project';
+    const gitRoot = await setupTestEnv([projectName]);
 
-    await commitAll(gitRoot, 'fix: file1');
+    const projectRoot = resolve(gitRoot, 'projects', projectName);
+    await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
+    await commitAll(gitRoot, 'feat: initial commit');
 
-    await applySemRel(gitRoot, 'project1', npmPlugin, true);
+    const initVersion = '1.0.0';
+    const initSemRel = await applySemRel(
+      gitRoot,
+      projectName,
+      npmMonorepoPluginPath
+    );
+    expect(initSemRel.stdout).toContain(
+      `There is no previous release, the next release version is ${initVersion}`
+    );
+    expect(initSemRel.stdout).toContain(
+      `Created tag ${projectName}-v${initVersion}`
+    );
+  }, 30000);
 
-    // TODO : expect nouvelle version
+  it('releases patch version', async () => {
+    const projectName = 'my-project';
+    const gitRoot = await setupTestEnv([projectName]);
+
+    const projectRoot = resolve(gitRoot, 'projects', projectName);
+    await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
+    await commitAll(gitRoot, 'feat: initial commit');
+    await applySemRel(gitRoot, projectName, npmMonorepoPluginPath);
+
+    await outputFile(resolve(projectRoot, 'fix.txt'), 'fix content');
+    await commitAll(gitRoot, 'fix: a fix');
+
+    const fixVersion = '1.0.1';
+    const fixSemRel = await applySemRel(
+      gitRoot,
+      projectName,
+      npmMonorepoPluginPath
+    );
+    expect(fixSemRel.stdout).toContain(
+      `The next release version is ${fixVersion}`
+    );
+    expect(fixSemRel.stdout).toContain(
+      `Created tag ${projectName}-v${fixVersion}`
+    );
+  }, 30000);
+
+  it('releases minor version', async () => {
+    const projectName = 'my-project';
+    const gitRoot = await setupTestEnv([projectName]);
+
+    const projectRoot = resolve(gitRoot, 'projects', projectName);
+    await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
+    await commitAll(gitRoot, 'feat: initial commit');
+    await applySemRel(gitRoot, projectName, npmMonorepoPluginPath);
+
+    await outputFile(resolve(projectRoot, 'feat.txt'), 'feat content');
+    await commitAll(gitRoot, 'feat: a feature');
+
+    const featVersion = '1.1.0';
+    const featSemRel = await applySemRel(
+      gitRoot,
+      projectName,
+      npmMonorepoPluginPath
+    );
+    expect(featSemRel.stdout).toContain(
+      `The next release version is ${featVersion}`
+    );
+    expect(featSemRel.stdout).toContain(
+      `Created tag ${projectName}-v${featVersion}`
+    );
+  }, 30000);
+
+  it('releases major version', async () => {
+    const projectName = 'my-project';
+    const gitRoot = await setupTestEnv([projectName]);
+
+    const projectRoot = resolve(gitRoot, 'projects', projectName);
+    await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
+    await commitAll(gitRoot, 'feat: initial commit');
+    await applySemRel(gitRoot, projectName, npmMonorepoPluginPath);
+
+    await outputFile(
+      resolve(projectRoot, 'breaking-change.txt'),
+      'breaking change content'
+    );
+    await commitAll(
+      gitRoot,
+      `feat: a feature
+      BREAKING CHANGE: with a breaking change`
+    );
+
+    const breakingChangeVersion = '2.0.0';
+    const breakingChangeSemRel = await applySemRel(
+      gitRoot,
+      projectName,
+      npmMonorepoPluginPath
+    );
+    expect(breakingChangeSemRel.stdout).toContain(
+      `The next release version is ${breakingChangeVersion}`
+    );
+    expect(breakingChangeSemRel.stdout).toContain(
+      `Created tag ${projectName}-v${breakingChangeVersion}`
+    );
   }, 30000);
 });
