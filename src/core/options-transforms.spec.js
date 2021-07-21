@@ -1,9 +1,4 @@
-const {
-  mapNextReleaseVersion,
-  mapLastReleaseVersionToLastReleaseGitTag,
-  mapNextReleaseVersionToNextReleaseGitTag,
-  mapCommits,
-} = require('./options-transforms');
+const { mapNextReleaseVersion, mapCommits } = require('./options-transforms');
 
 const OPTIONS = {
   commits: [1, 2, 3, 4],

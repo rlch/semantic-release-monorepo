@@ -1,8 +1,9 @@
 const { compose } = require('ramda');
+const { wrapStep } = require('semantic-release-plugin-decorators');
+
+const logPluginVersion = require('./log-plugin-version');
 const withOnlyPackageCommits = require('./only-package-commits');
 const versionToGitTag = require('./version-to-git-tag');
-const logPluginVersion = require('./log-plugin-version');
-const { wrapStep } = require('semantic-release-plugin-decorators');
 
 const {
   mapNextReleaseVersion,

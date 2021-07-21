@@ -2,11 +2,11 @@ const execa = require('execa');
 const { mkdir, outputJson } = require('fs-extra');
 const { resolve } = require('path');
 
-const { createOrigin, clone, pushAll } = require('./test-env');
+const { createOrigin, clone, pushAll } = require('./common');
 
 const gitRepoName = 'workspace';
 
-const setupWorkspace = async () => {
+const setupNpmWorkspace = async () => {
   const originDirectory = await createOrigin();
   const gitRepoUrl = `file://${originDirectory}`;
   const gitRoot = await clone(gitRepoUrl);
@@ -30,26 +30,25 @@ const setupWorkspace = async () => {
   return gitRoot;
 };
 
-const setupProject = async (gitRoot, projectName) => {
+const setupNpmProject = async (gitRoot, projectName) => {
   const projectRoot = resolve(gitRoot, 'projects', projectName);
   await mkdir(projectRoot, { recursive: true });
   await execa('npm', ['init', '-y'], { cwd: projectRoot });
   await pushAll(gitRoot, `chore: init ${projectName}'`);
 };
 
-const setupTestEnv = async (projectNames = []) => {
-  const gitRoot = await setupWorkspace();
+const setupNpmTestEnv = async (projectNames = []) => {
+  const gitRoot = await setupNpmWorkspace();
 
   for (const projectName of projectNames) {
-    await setupProject(gitRoot, projectName);
+    await setupNpmProject(gitRoot, projectName);
   }
 
   return gitRoot;
 };
 
-// TODO : split in 3 files -> test-env, npm-test-env, dotnet-test-env
 module.exports = {
-  setupWorkspace,
-  setupProject,
-  setupTestEnv,
+  setupNpmWorkspace,
+  setupNpmProject,
+  setupNpmTestEnv,
 };

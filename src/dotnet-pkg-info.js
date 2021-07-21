@@ -1,6 +1,6 @@
+const SemanticReleaseError = require('@semantic-release/error');
 const glob = require('glob-promise');
 const { resolve } = require('path');
-const SemanticReleaseError = require('@semantic-release/error');
 
 const getProjectRoot = async cwd => {
   cwd = cwd || process.cwd();

@@ -1,13 +1,7 @@
 const execa = require('execa');
 const { pathExists } = require('fs-extra');
-const { resolve } = require('path');
 
-const {
-  clone,
-  createOrigin,
-  setupWorkspace,
-  setupProject,
-} = require('./test-env');
+const { clone, createOrigin } = require('./common');
 
 describe('test-env', () => {
   it('creates an origin git repository', async () => {

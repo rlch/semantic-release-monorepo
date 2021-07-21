@@ -1,7 +1,8 @@
-const { getProjectRoot, getProjectName } = require('./dotnet-pkg-info');
-const { directory } = require('tempy');
-const { mkdir, outputFile } = require('fs-extra');
+const { outputFile } = require('fs-extra');
 const { resolve } = require('path');
+const { directory } = require('tempy');
+
+const { getProjectRoot, getProjectName } = require('./dotnet-pkg-info');
 
 describe('dotnet-pkg-info', () => {
   describe('gets project root', () => {

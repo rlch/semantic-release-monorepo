@@ -1,7 +1,7 @@
+const SemanticReleaseError = require('@semantic-release/error');
+const { resolve } = require('path');
 const pkgUp = require('pkg-up');
 const readPkg = require('read-pkg');
-const { resolve } = require('path');
-const SemanticReleaseError = require('@semantic-release/error');
 
 const newNoPackageJsonError = () =>
   new SemanticReleaseError(

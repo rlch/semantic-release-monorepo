@@ -2,22 +2,22 @@ const { pathExists } = require('fs-extra');
 const { resolve } = require('path');
 
 const {
-  setupWorkspace,
-  setupProject,
-  setupTestEnv,
-} = require('./npm-test-env');
+  setupNpmWorkspace,
+  setupNpmProject,
+  setupNpmTestEnv,
+} = require('./npm');
 
 describe('npm-test-env', () => {
   it('initializes a workspace', async () => {
-    const gitRoot = await setupWorkspace();
+    const gitRoot = await setupNpmWorkspace();
     expect(await pathExists(resolve(gitRoot, 'package.json'))).toBe(true);
     expect(await pathExists(resolve(gitRoot, '.releaserc.json'))).toBe(true);
   });
 
   it('adds a project to the workspace', async () => {
-    const gitRoot = await setupWorkspace();
+    const gitRoot = await setupNpmWorkspace();
     const projectName = 'test';
-    await setupProject(gitRoot, projectName);
+    await setupNpmProject(gitRoot, projectName);
     expect(
       await pathExists(
         resolve(gitRoot, 'projects', projectName, 'package.json')
@@ -27,7 +27,7 @@ describe('npm-test-env', () => {
 
   it('creates a test environment', async () => {
     const projects = ['project1', 'project2'];
-    const gitRoot = await setupTestEnv(projects);
+    const gitRoot = await setupNpmTestEnv(projects);
     expect(await pathExists(resolve(gitRoot, 'package.json'))).toBe(true);
     expect(await pathExists(resolve(gitRoot, '.releaserc.json'))).toBe(true);
     for (const project of projects) {

@@ -1,5 +1,5 @@
-const { relative } = require('path');
 const execa = require('execa');
+const { relative } = require('path');
 
 const git = async (args, options = {}) => {
   const { stdout } = await execa('git', args, options);

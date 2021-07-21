@@ -1,8 +1,8 @@
 const { outputFile } = require('fs-extra');
 const { resolve } = require('path');
-const { setupTestEnv } = require('./npm-test-env');
 
-const { commitAll, applySemRel } = require('./test-env');
+const { commitAll, applySemRel } = require('./test-env/common');
+const { setupNpmTestEnv } = require('./test-env/npm');
 
 describe('npm', () => {
   const semanticReleaseMonorepoPath = process.cwd();
@@ -14,7 +14,7 @@ describe('npm', () => {
 
   it('does not release chore commits', async () => {
     const projectName = 'my-project';
-    const gitRoot = await setupTestEnv([projectName]);
+    const gitRoot = await setupNpmTestEnv([projectName]);
 
     const choreSemRel = await applySemRel(
       gitRoot,
@@ -28,7 +28,7 @@ describe('npm', () => {
 
   it('releases major version for initial commit', async () => {
     const projectName = 'my-project';
-    const gitRoot = await setupTestEnv([projectName]);
+    const gitRoot = await setupNpmTestEnv([projectName]);
 
     const projectRoot = resolve(gitRoot, 'projects', projectName);
     await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
@@ -50,7 +50,7 @@ describe('npm', () => {
 
   it('releases patch version', async () => {
     const projectName = 'my-project';
-    const gitRoot = await setupTestEnv([projectName]);
+    const gitRoot = await setupNpmTestEnv([projectName]);
 
     const projectRoot = resolve(gitRoot, 'projects', projectName);
     await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
@@ -76,7 +76,7 @@ describe('npm', () => {
 
   it('releases minor version', async () => {
     const projectName = 'my-project';
-    const gitRoot = await setupTestEnv([projectName]);
+    const gitRoot = await setupNpmTestEnv([projectName]);
 
     const projectRoot = resolve(gitRoot, 'projects', projectName);
     await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
@@ -102,7 +102,7 @@ describe('npm', () => {
 
   it('releases major version', async () => {
     const projectName = 'my-project';
-    const gitRoot = await setupTestEnv([projectName]);
+    const gitRoot = await setupNpmTestEnv([projectName]);
 
     const projectRoot = resolve(gitRoot, 'projects', projectName);
     await outputFile(resolve(projectRoot, 'init.txt'), 'init content');

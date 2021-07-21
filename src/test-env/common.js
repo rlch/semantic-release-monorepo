@@ -1,5 +1,4 @@
 const execa = require('execa');
-const { mkdir, outputJson } = require('fs-extra');
 const { resolve } = require('path');
 const { directory } = require('tempy');
 
@@ -42,7 +41,6 @@ const applySemRel = async (gitRoot, projectName, monorepoPluginPath) => {
   );
 };
 
-// TODO : split in 3 files -> test-env, npm-test-env, dotnet-test-env
 module.exports = {
   createOrigin,
   clone,
