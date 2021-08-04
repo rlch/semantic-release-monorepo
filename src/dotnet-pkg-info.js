@@ -1,6 +1,7 @@
 const SemanticReleaseError = require('@semantic-release/error');
 const glob = require('glob-promise');
 const { resolve } = require('path');
+const { readFile } = require('fs-extra');
 
 const getProjectRoot = async cwd => {
   cwd = cwd || process.cwd();
@@ -50,8 +51,35 @@ const getProjectNameSync = cwd => {
   );
 };
 
+const getProjectVersion = async cwd => {
+  cwd = cwd || process.cwd();
+
+  const csprojPath = (await glob('*.csproj', { absolute: true, cwd }))[0];
+
+  if (csprojPath) {
+    const content = await readFile(csprojPath, 'utf8');
+    const searchVersion = /<Version>(.*)<\/Version>/.exec(content);
+    if (searchVersion) {
+      return searchVersion[1];
+    }
+
+    throw new SemanticReleaseError(
+      'No version in .csproj file',
+      'NO_CSPROJ_VERSION',
+      '.csproj file should contain a version tag'
+    );
+  }
+
+  throw new SemanticReleaseError(
+    'No .csproj file',
+    'NO_CSPROJ',
+    'semantic-release should be ran in an individual monorepo package with a .csproj file'
+  );
+};
+
 module.exports = {
   getProjectRoot,
   getProjectName,
   getProjectNameSync,
+  getProjectVersion,
 };

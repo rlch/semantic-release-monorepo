@@ -2,37 +2,43 @@ const { outputFile } = require('fs-extra');
 const { resolve } = require('path');
 
 const { commitAll, applySemRel } = require('./test-env/common');
-const { setupNpmTestEnv, getNpmProjectRoot } = require('./test-env/npm');
+const {
+  setupDotnetTestEnv,
+  getDotNetProjectRoot,
+} = require('./test-env/dotnet');
 
-describe('npm', () => {
+describe('dotnet', () => {
   const semanticReleaseMonorepoPath = process.cwd();
-  const npmMonorepoPluginPath = resolve(
+  const dotnetMonorepoPluginPath = resolve(
     semanticReleaseMonorepoPath,
     'src',
-    'npm'
+    'dotnet'
   );
 
   it('does not release chore commits', async () => {
-    const projectName = 'my-project';
-    const gitRoot = await setupNpmTestEnv([projectName]);
+    const projectName = 'MyProject';
+    const gitRoot = await setupDotnetTestEnv([projectName]);
 
-    const projectRoot = getNpmProjectRoot(gitRoot, projectName);
-    const choreSemRel = await applySemRel(projectRoot, npmMonorepoPluginPath);
+    const projectRoot = getDotNetProjectRoot(gitRoot, projectName);
+    const choreSemRel = await applySemRel(
+      projectRoot,
+      dotnetMonorepoPluginPath
+    );
     expect(choreSemRel.stdout).toContain(
       'There are no relevant changes, so no new version is released'
     );
   }, 30000);
 
   it('releases major version for initial commit', async () => {
-    const projectName = 'my-project';
-    const gitRoot = await setupNpmTestEnv([projectName]);
+    const projectName = 'MyProject';
+    const gitRoot = await setupDotnetTestEnv([projectName]);
 
-    const projectRoot = getNpmProjectRoot(gitRoot, projectName);
+    const projectRoot = getDotNetProjectRoot(gitRoot, projectName);
     await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
     await commitAll(gitRoot, 'feat: initial commit');
 
     const initVersion = '1.0.0';
-    const initSemRel = await applySemRel(projectRoot, npmMonorepoPluginPath);
+    const initSemRel = await applySemRel(projectRoot, dotnetMonorepoPluginPath);
     expect(initSemRel.stdout).toContain(
       `There is no previous release, the next release version is ${initVersion}`
     );
@@ -42,19 +48,19 @@ describe('npm', () => {
   }, 30000);
 
   it('releases patch version', async () => {
-    const projectName = 'my-project';
-    const gitRoot = await setupNpmTestEnv([projectName]);
+    const projectName = 'MyProject';
+    const gitRoot = await setupDotnetTestEnv([projectName]);
 
-    const projectRoot = getNpmProjectRoot(gitRoot, projectName);
+    const projectRoot = getDotNetProjectRoot(gitRoot, projectName);
     await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
     await commitAll(gitRoot, 'feat: initial commit');
-    await applySemRel(projectRoot, npmMonorepoPluginPath);
+    await applySemRel(projectRoot, dotnetMonorepoPluginPath);
 
     await outputFile(resolve(projectRoot, 'fix.txt'), 'fix content');
     await commitAll(gitRoot, 'fix: a fix');
 
     const fixVersion = '1.0.1';
-    const fixSemRel = await applySemRel(projectRoot, npmMonorepoPluginPath);
+    const fixSemRel = await applySemRel(projectRoot, dotnetMonorepoPluginPath);
     expect(fixSemRel.stdout).toContain(
       `The next release version is ${fixVersion}`
     );
@@ -64,19 +70,19 @@ describe('npm', () => {
   }, 30000);
 
   it('releases minor version', async () => {
-    const projectName = 'my-project';
-    const gitRoot = await setupNpmTestEnv([projectName]);
+    const projectName = 'MyProject';
+    const gitRoot = await setupDotnetTestEnv([projectName]);
 
-    const projectRoot = getNpmProjectRoot(gitRoot, projectName);
+    const projectRoot = getDotNetProjectRoot(gitRoot, projectName);
     await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
     await commitAll(gitRoot, 'feat: initial commit');
-    await applySemRel(projectRoot, npmMonorepoPluginPath);
+    await applySemRel(projectRoot, dotnetMonorepoPluginPath);
 
     await outputFile(resolve(projectRoot, 'feat.txt'), 'feat content');
     await commitAll(gitRoot, 'feat: a feature');
 
     const featVersion = '1.1.0';
-    const featSemRel = await applySemRel(projectRoot, npmMonorepoPluginPath);
+    const featSemRel = await applySemRel(projectRoot, dotnetMonorepoPluginPath);
     expect(featSemRel.stdout).toContain(
       `The next release version is ${featVersion}`
     );
@@ -86,13 +92,13 @@ describe('npm', () => {
   }, 30000);
 
   it('releases major version', async () => {
-    const projectName = 'my-project';
-    const gitRoot = await setupNpmTestEnv([projectName]);
+    const projectName = 'MyProject';
+    const gitRoot = await setupDotnetTestEnv([projectName]);
 
-    const projectRoot = getNpmProjectRoot(gitRoot, projectName);
+    const projectRoot = getDotNetProjectRoot(gitRoot, projectName);
     await outputFile(resolve(projectRoot, 'init.txt'), 'init content');
     await commitAll(gitRoot, 'feat: initial commit');
-    await applySemRel(projectRoot, npmMonorepoPluginPath);
+    await applySemRel(projectRoot, dotnetMonorepoPluginPath);
 
     await outputFile(
       resolve(projectRoot, 'breaking-change.txt'),
@@ -107,7 +113,7 @@ describe('npm', () => {
     const breakingChangeVersion = '2.0.0';
     const breakingChangeSemRel = await applySemRel(
       projectRoot,
-      npmMonorepoPluginPath
+      dotnetMonorepoPluginPath
     );
     expect(breakingChangeSemRel.stdout).toContain(
       `The next release version is ${breakingChangeVersion}`

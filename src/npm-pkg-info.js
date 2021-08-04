@@ -44,8 +44,19 @@ const getProjectNameSync = cwd => {
   }
 };
 
+const getProjectVersion = async cwd => {
+  cwd = cwd || process.cwd();
+
+  try {
+    return (await readPkg({ cwd })).version;
+  } catch {
+    throw newNoPackageJsonError();
+  }
+};
+
 module.exports = {
   getProjectRoot,
   getProjectName,
   getProjectNameSync,
+  getProjectVersion,
 };

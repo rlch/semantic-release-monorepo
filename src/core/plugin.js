@@ -10,11 +10,11 @@ const {
   withOptionsTransforms,
 } = require('./options-transforms');
 
-const analyzeCommits = (getProjectRoot, getProjectName) =>
+const analyzeCommits = (getProjectRoot, getProjectName, getProjectVersion) =>
   wrapStep(
     'analyzeCommits',
     compose(
-      logPluginVersion('analyzeCommits'),
+      logPluginVersion('analyzeCommits', getProjectVersion),
       withOnlyPackageCommits(getProjectRoot, getProjectName)
     ),
     {
@@ -22,11 +22,11 @@ const analyzeCommits = (getProjectRoot, getProjectName) =>
     }
   );
 
-const generateNotes = (getProjectRoot, getProjectName) =>
+const generateNotes = (getProjectRoot, getProjectName, getProjectVersion) =>
   wrapStep(
     'generateNotes',
     compose(
-      logPluginVersion('generateNotes'),
+      logPluginVersion('generateNotes', getProjectVersion),
       withOnlyPackageCommits(getProjectRoot, getProjectName),
       withOptionsTransforms([
         mapNextReleaseVersion(versionToGitTag(getProjectName)),
@@ -37,11 +37,11 @@ const generateNotes = (getProjectRoot, getProjectName) =>
     }
   );
 
-const success = (getProjectRoot, getProjectName) =>
+const success = (getProjectRoot, getProjectName, getProjectVersion) =>
   wrapStep(
     'success',
     compose(
-      logPluginVersion('success'),
+      logPluginVersion('success', getProjectVersion),
       withOnlyPackageCommits(getProjectRoot, getProjectName),
       withOptionsTransforms([
         mapNextReleaseVersion(versionToGitTag(getProjectName)),
@@ -52,11 +52,11 @@ const success = (getProjectRoot, getProjectName) =>
     }
   );
 
-const fail = (getProjectRoot, getProjectName) =>
+const fail = (getProjectRoot, getProjectName, getProjectVersion) =>
   wrapStep(
     'fail',
     compose(
-      logPluginVersion('fail'),
+      logPluginVersion('fail', getProjectVersion),
       withOnlyPackageCommits(getProjectRoot, getProjectName),
       withOptionsTransforms([
         mapNextReleaseVersion(versionToGitTag(getProjectName)),
@@ -67,10 +67,23 @@ const fail = (getProjectRoot, getProjectName) =>
     }
   );
 
-module.exports = (getProjectRoot, getProjectName, getProjectNameSync) => ({
-  analyzeCommits: analyzeCommits(getProjectRoot, getProjectName),
-  generateNotes: generateNotes(getProjectRoot, getProjectName),
-  success: success(getProjectRoot, getProjectName),
-  fail: fail(getProjectRoot, getProjectName),
+module.exports = (
+  getProjectRoot,
+  getProjectName,
+  getProjectNameSync,
+  getProjectVersion
+) => ({
+  analyzeCommits: analyzeCommits(
+    getProjectRoot,
+    getProjectName,
+    getProjectVersion
+  ),
+  generateNotes: generateNotes(
+    getProjectRoot,
+    getProjectName,
+    getProjectVersion
+  ),
+  success: success(getProjectRoot, getProjectName, getProjectVersion),
+  fail: fail(getProjectRoot, getProjectName, getProjectVersion),
   tagFormat: getProjectNameSync() + '-v${version}',
 });

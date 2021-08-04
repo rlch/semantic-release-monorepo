@@ -32,9 +32,8 @@ const pushAll = async (gitRoot, message) => {
   });
 };
 
-const applySemRel = async (gitRoot, projectName, monorepoPluginPath) => {
-  const projectRoot = resolve(gitRoot, 'projects', projectName);
-  return execa(
+const applySemRel = async (projectRoot, monorepoPluginPath) => {
+  return await execa(
     'npx',
     ['semantic-release', '-e', monorepoPluginPath, '--no-ci', '--debug'],
     { cwd: projectRoot }
