@@ -2,20 +2,14 @@ const execa = require('execa');
 const { mkdir, outputJson } = require('fs-extra');
 const { resolve } = require('path');
 
-const { createOrigin, clone, pushAll, applySemRel } = require('./common');
+const { pushAll, setupGit } = require('./common');
 
 const setupNpmWorkspace = async () => {
-  const originDirectory = await createOrigin();
-  const gitRepoUrl = `file://${originDirectory}`;
-  const gitRoot = await clone(gitRepoUrl);
+  const gitRoot = await setupGit();
 
   await outputJson(resolve(gitRoot, 'package.json'), {
     name: 'test-workspace',
     version: '0.0.0',
-    repository: {
-      type: 'git',
-      url: gitRepoUrl,
-    },
   });
   await outputJson(resolve(gitRoot, '.releaserc.json'), {
     plugins: [

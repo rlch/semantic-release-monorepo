@@ -41,5 +41,5 @@ describe('dotnet test-env', () => {
         pathExists(resolve(gitRoot, projectName, `${projectName}.csproj`))
       ).resolves.toBe(true);
     }
-  }, 30000);
+  });
 });

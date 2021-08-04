@@ -16,6 +16,13 @@ const clone = async gitRepoUrl => {
   return gitRoot;
 };
 
+const setupGit = async () => {
+  const originDirectory = await createOrigin();
+  const gitRepoUrl = `file://${originDirectory}`;
+  const gitRoot = await clone(gitRepoUrl);
+  return gitRoot;
+};
+
 const commitAll = async (gitRoot, message) => {
   await execa('git', ['add', '-A'], { cwd: gitRoot });
   await execa('git', ['commit', '-m', message], { cwd: gitRoot });
@@ -43,6 +50,7 @@ const applySemRel = async (projectRoot, monorepoPluginPath) => {
 module.exports = {
   createOrigin,
   clone,
+  setupGit,
   commitAll,
   pushAll,
   applySemRel,

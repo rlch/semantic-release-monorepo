@@ -1,13 +1,11 @@
 const execa = require('execa');
-const { outputJson, readFile, writeFile, outputFile } = require('fs-extra');
+const { outputJson, outputFile } = require('fs-extra');
 const { resolve } = require('path');
 
-const { createOrigin, clone, pushAll } = require('./common');
+const { pushAll, setupGit } = require('./common');
 
 const setupDotnetSolution = async () => {
-  const originDirectory = await createOrigin();
-  const gitRepoUrl = `file://${originDirectory}`;
-  const gitRoot = await clone(gitRepoUrl);
+  const gitRoot = await setupGit();
 
   await execa('dotnet', ['new', 'sln', '-n', 'TestSolution'], { cwd: gitRoot });
   await outputJson(resolve(gitRoot, '.releaserc.json'), {
@@ -22,25 +20,22 @@ const setupDotnetSolution = async () => {
 };
 
 const setupDotnetProject = async (gitRoot, projectName) => {
-  await execa('dotnet', ['new', 'console', '-o', projectName], {
-    cwd: gitRoot,
-  });
-  await execa(
-    'dotnet',
-    ['sln', 'add', `${projectName}\\${projectName}.csproj`],
-    { cwd: gitRoot }
-  );
   await outputFile(
     resolve(gitRoot, projectName, `${projectName}.csproj`),
     `<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-      <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
-      <LangVersion>9</LangVersion>
+    <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-      <Version>1.0.0</Version>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 </Project>`
+  );
+  await execa(
+    'dotnet',
+    ['sln', 'add', `${projectName}\\${projectName}.csproj`],
+    { cwd: gitRoot }
   );
   await pushAll(gitRoot, `chore: init ${projectName}'`);
 };
