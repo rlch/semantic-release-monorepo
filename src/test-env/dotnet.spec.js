@@ -10,9 +10,6 @@ const {
 describe('dotnet test-env', () => {
   it('initializes a solution', async () => {
     const gitRoot = await setupDotnetSolution();
-    await expect(
-      pathExists(resolve(gitRoot, 'TestSolution.sln'))
-    ).resolves.toBe(true);
     await expect(pathExists(resolve(gitRoot, '.releaserc.json'))).resolves.toBe(
       true
     );
@@ -30,9 +27,6 @@ describe('dotnet test-env', () => {
   it('creates a test environment', async () => {
     const projectNames = ['Project1', 'Project2'];
     const gitRoot = await setupDotnetTestEnv(projectNames);
-    await expect(
-      pathExists(resolve(gitRoot, 'TestSolution.sln'))
-    ).resolves.toBe(true);
     await expect(pathExists(resolve(gitRoot, '.releaserc.json'))).resolves.toBe(
       true
     );

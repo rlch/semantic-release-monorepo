@@ -1,4 +1,3 @@
-const execa = require('execa');
 const { outputJson, outputFile } = require('fs-extra');
 const { resolve } = require('path');
 
@@ -7,7 +6,6 @@ const { pushAll, setupGit } = require('./common');
 const setupDotnetSolution = async () => {
   const gitRoot = await setupGit();
 
-  await execa('dotnet', ['new', 'sln', '-n', 'TestSolution'], { cwd: gitRoot });
   await outputJson(resolve(gitRoot, '.releaserc.json'), {
     plugins: [
       '@semantic-release/commit-analyzer',
@@ -31,11 +29,6 @@ const setupDotnetProject = async (gitRoot, projectName) => {
     <Version>1.0.0</Version>
   </PropertyGroup>
 </Project>`
-  );
-  await execa(
-    'dotnet',
-    ['sln', 'add', `${projectName}\\${projectName}.csproj`],
-    { cwd: gitRoot }
   );
   await pushAll(gitRoot, `chore: init ${projectName}'`);
 };

@@ -13,6 +13,10 @@ const createOrigin = async () => {
 const clone = async gitRepoUrl => {
   const gitRoot = resolve(directory(), gitRepoName);
   await execa('git', ['clone', gitRepoUrl, gitRoot]);
+  await execa('git', ['config', 'user.email', 'test@test.com'], {
+    cwd: gitRoot,
+  });
+  await execa('git', ['config', 'user.name', 'Test User'], { cwd: gitRoot });
   return gitRoot;
 };
 
@@ -42,8 +46,8 @@ const pushAll = async (gitRoot, message) => {
 const applySemRel = async (projectRoot, monorepoPluginPath) => {
   return await execa(
     'npx',
-    ['semantic-release', '-e', monorepoPluginPath, '--no-ci', '--debug'],
-    { cwd: projectRoot }
+    ['semantic-release', '-e', monorepoPluginPath, '--no-ci'],
+    { cwd: projectRoot, env: { TRAVIS: undefined } }
   );
 };
 
