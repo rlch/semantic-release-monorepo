@@ -1,5 +1,5 @@
 const { compose } = require('ramda');
-const { wrapStep } = require('semantic-release-plugin-decorators');
+const { wrapStep } = require('@rlch/semantic-release-plugin-decorators');
 
 const logPluginVersion = require('./log-plugin-version');
 const withOnlyPackageCommits = require('./only-package-commits');
