@@ -3,7 +3,7 @@ const { compose } = require('ramda');
 const withOnlyPackageCommits = require('./only-package-commits');
 const versionToGitTag = require('./version-to-git-tag');
 const logPluginVersion = require('./log-plugin-version');
-const { wrapStep } = require('semantic-release-plugin-decorators');
+const { wrapStep } = require('@rlch/semantic-release-plugin-decorators');
 
 const {
   mapNextReleaseVersion,
