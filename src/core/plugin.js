@@ -1,3 +1,5 @@
+const SemanticReleaseError = require('@semantic-release/error');
+const { cosmiconfigSync } = require('cosmiconfig');
 const { compose } = require('ramda');
 const { wrapStep } = require('@rlch/semantic-release-plugin-decorators');
 
@@ -67,23 +69,49 @@ const fail = (getProjectRoot, getProjectName, getProjectVersion) =>
     }
   );
 
+const missingFunction = fnName => {
+  return new SemanticReleaseError(
+    `Mising function ${fnName} from config.pkgInfo`,
+    'PKG_INFO_MISSING_FUNCTION',
+    'semantic-release config.pkgInfo missing a function'
+  );
+};
+
+const CONFIG_NAME = 'release';
 module.exports = (
   getProjectRoot,
   getProjectName,
   getProjectNameSync,
   getProjectVersion
-) => ({
-  analyzeCommits: analyzeCommits(
-    getProjectRoot,
-    getProjectName,
-    getProjectVersion
-  ),
-  generateNotes: generateNotes(
-    getProjectRoot,
-    getProjectName,
-    getProjectVersion
-  ),
-  success: success(getProjectRoot, getProjectName, getProjectVersion),
-  fail: fail(getProjectRoot, getProjectName, getProjectVersion),
-  tagFormat: getProjectNameSync() + '-v${version}',
-});
+) => {
+  const pkgInfo = {
+    ...cosmiconfigSync(CONFIG_NAME).search(process.cwd()).config.pkgInfo,
+  };
+  if (pkgInfo) {
+    const assignFn = fnName => {
+      if (pkgInfo[fnName]) {
+        return pkgInfo[fnName];
+      }
+      throw missingFunction(fnName);
+    };
+    getProjectRoot = assignFn('getProjectRoot');
+    getProjectName = assignFn('getProjectName');
+    getProjectNameSync = assignFn('getProjectNameSync');
+    getProjectVersion = assignFn('getProjectVersion');
+  }
+  return {
+    analyzeCommits: analyzeCommits(
+      getProjectRoot,
+      getProjectName,
+      getProjectVersion
+    ),
+    generateNotes: generateNotes(
+      getProjectRoot,
+      getProjectName,
+      getProjectVersion
+    ),
+    success: success(getProjectRoot, getProjectName, getProjectVersion),
+    fail: fail(getProjectRoot, getProjectName, getProjectVersion),
+    tagFormat: getProjectNameSync() + '-v${version}',
+  };
+};
