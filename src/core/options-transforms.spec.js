@@ -11,7 +11,7 @@ const OPTIONS = {
 };
 
 const even = n => n % 2 === 0;
-const toTag = x => `tag-${x}`;
+const toTag = x => `app-${x}`;
 
 describe('semantic-release plugin options transforms', () => {
   describe('#mapCommits', () => {
@@ -30,7 +30,7 @@ describe('semantic-release plugin options transforms', () => {
       await expect(mapNextReleaseVersion(toTag)(OPTIONS)).resolves.toEqual({
         ...OPTIONS,
         nextRelease: {
-          version: 'tag-4.5.6',
+          version: 'app-4.5.6',
         },
       });
     });

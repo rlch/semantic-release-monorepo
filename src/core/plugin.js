@@ -87,7 +87,7 @@ module.exports = (
   const pkgInfo = {
     ...cosmiconfigSync(CONFIG_NAME).search(process.cwd()).config.pkgInfo,
   };
-  if (pkgInfo) {
+  if (Object.entries(pkgInfo).length > 0) {
     const assignFn = fnName => {
       if (pkgInfo[fnName]) {
         return pkgInfo[fnName];
